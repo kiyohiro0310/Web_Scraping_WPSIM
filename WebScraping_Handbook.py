@@ -39,10 +39,21 @@ df.to_excel("programs.xlsx", index=False)
 majors_minors_lists = soup.find_all("ul", {"id": "/majors-minors/"})
 majors_minors_lists = majors_minors_lists[0]
 majors_minors=[]
+cdms_majors_minors =[]
 
 for item in majors_minors_lists:
     if(item.get_text()!='\n'):
+        anchor_element = item.find('a')
+        url="https://hbook.westernsydney.edu.au"+anchor_element.get('href')
+        response = requests.get(url).text
+        soup = BeautifulSoup(response, "html.parser")
+        program_advice=soup.find_all("a", {"href": "mailto:CDMS@westernsydney.edu.au"})
+        if(len(program_advice)!=0):
+            cdms_majors_minors.append(item.get_text())
         majors_minors.append(item.get_text())
+
+df = pd.DataFrame(cdms_majors_minors, columns=["Majors&Minors"]) 
+df.to_excel("cdms_majors_minors.xlsx", index=False) 
 
 df = pd.DataFrame(majors_minors, columns=["Majors&Minors"]) 
 df.to_excel("majors_minors.xlsx", index=False) 
@@ -65,7 +76,7 @@ df.to_excel("subjects.xlsx", index=False)
 
 
 #Fetch CDMS subjects
-with open('C:/Users/ASUS/ICTPracticum/subjects.html', 'r') as file:
+with open('C:/Users/ASUS/ICTPracticum/handbook_subjects.html', 'r') as file:
     html_content = file.read()
 
 # Parse the HTML
